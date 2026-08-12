@@ -56,17 +56,26 @@ whole thing is sandboxed with no network access.
 
 ## Installing
 
-Requires Xcode and [xcodegen](https://github.com/yonaskolb/XcodeGen)
-(`brew install xcodegen`). Building from source keeps Gatekeeper happy —
-locally built apps aren't quarantined, so there's nothing to right-click-open.
+**Homebrew** (easiest):
+
+```sh
+brew install --cask goodgord/tap/mdsee
+```
+
+**Download**: grab the zip from the
+[latest release](https://github.com/goodgord/mdsee/releases/latest), unzip,
+and drag MDSee.app to Applications. Releases are signed and notarized, so
+Gatekeeper is happy. Open the app once to register the Quick Look extension.
+
+**From source** — requires Xcode and
+[xcodegen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`):
 
 ```sh
 git clone https://github.com/goodgord/mdsee.git
 mdsee/mac/install.sh
 ```
 
-That builds MDSee, installs it to /Applications, and registers the Quick
-Look extension. Press space on a `.md` file and you're done.
+Whichever route: press space on a `.md` file and you're done.
 
 If another Quick Look extension already owns markdown previews (Markdown
 Peek, QLMarkdown, …), pick the handler in **System Settings → General →
