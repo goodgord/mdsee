@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --ink: #1c1e24;
+    --ink-mute: #5b6069;
+    --line: #e3e5e9;
+    --surface: #f5f6f8;
+    --accent: #0071f9;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111215;
+      --ink: #f1f2f4;
+      --ink-mute: #a4a7ad;
+      --line: #2a2b30;
+      --surface: #1a1b1e;
+      --accent: #4d9bff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 36px 32px 80px; }
+  h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
+  h1 { font-size: 1.7em; border-bottom: 1px solid var(--line); padding-bottom: .35em; }
+  h2 { font-size: 1.35em; margin-top: 1.8em; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: var(--mono); font-size: .88em; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: .1em .35em; }
+  pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+  pre code { background: none; border: 0; padding: 0; }
+  blockquote { margin: 1em 0; padding: .2em 1em; border-left: 3px solid var(--line); color: var(--ink-mute); }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+  img { max-width: 100%; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  th { background: var(--surface); }
+
+  .wikilink {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 4px;
+    padding: .05em .3em;
+    font-weight: 500;
+  }
+
+  /* A parsed frontmatter node, drawn the way the map draws its cards. */
+  .ncard {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--node-color, var(--accent));
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 1.6em 0 .9em;
+  }
+  .ncard-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .ncard-type {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--node-color, var(--accent));
+  }
+  .ncard-title { font-weight: 600; font-size: 15px; }
+  .ncard-id { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+  .ncard-rels { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .ncard-rel { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }
+  .ncard-rel-verb { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mute); letter-spacing: .05em; }
+  .ncard-rel .wikilink { font-size: 12px; }
+  .ncard-meta { margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); line-height: 1.8; white-space: pre-wrap; }
+  .ncard-meta b { color: var(--ink); font-weight: 600; }
+
+  /* The map-config block renders as one quiet line, not a card. */
+  .map-config {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-mute);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px; margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+
+  .file-picker {
+    position: sticky; top: 0;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 32px;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .file-picker select {
+    font: inherit; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px;
+    max-width: 100%;
+  }
+  .empty { color: var(--ink-mute); text-align: center; padding: 80px 0; }
+</style>
+</head>
+<body>
+<div id="picker"></div>
+<main id="content"><p class="empty">Loading…</p></main>
+<script src="/md/marked.min.js"></script>
+<script>
+(async () => {
+  const content = document.getElementById('content');
+  const pickerHost = document.getElementById('picker');
+  let data;
+  try {
+    data = await fetch('/__files.json').then((r) => r.json());
+  } catch (e) {
+    content.innerHTML = '<p class="empty">Could not read the file.</p>';
+    return;
+  }
+  const files = data?.files ?? [];
+  if (!files.length) {
+    content.innerHTML = '<p class="empty">No markdown here.</p>';
+    return;
+  }
+
+  marked.use({ mangle: false, headerIds: false });
+
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+  // The same palette trick the map uses: a stable hue per type name.
+  const typeColor = (type) => {
+    let h = 0;
+    for (const c of String(type)) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return `oklch(0.62 0.16 ${h})`;
+  };
+
+  // Tiny YAML-subset parser for md2hd node blocks: `key: value`, one level of
+  // nesting, and inline [a, b] lists. Returns null when it doesn't look sane.
+  const parseNode = (body) => {
+    const top = {};
+    let currentKey = null;
+    for (const raw of body.split('\n')) {
+      if (!raw.trim()) continue;
+      const nested = /^[ \t]+([A-Za-z0-9_-]+)[ \t]*:[ \t]*(.*)$/.exec(raw);
+      const flat = /^([A-Za-z0-9_-]+)[ \t]*:[ \t]*(.*)$/.exec(raw);
+      if (!raw.startsWith(' ') && !raw.startsWith('\t') && flat) {
+        const [, key, value] = flat;
+        currentKey = key;
+        top[key] = value === '' ? {} : parseValue(value);
+      } else if (nested && currentKey && typeof top[currentKey] === 'object' && !Array.isArray(top[currentKey])) {
+        top[currentKey][nested[1]] = parseValue(nested[2]);
+      } else {
+        return null;
+      }
+    }
+    return Object.keys(top).length ? top : null;
+  };
+  const parseValue = (v) => {
+    const m = /^\[(.*)\]$/.exec(v.trim());
+    if (m) return m[1].split(',').map((s) => s.trim()).filter(Boolean);
+    return v.trim();
+  };
+
+  const wikilink = (label) => `<span class="wikilink">${esc(label)}</span>`;
+
+  const renderNodeCard = (node, rawBody) => {
+    if (!node) {
+      return `<div class="ncard"><div class="ncard-meta">${esc(rawBody)}</div></div>`;
+    }
+    if (node.type === 'map') {
+      const title = node.title ? ` · ${esc(node.title)}` : '';
+      return `<div class="map-config">map${title}</div>`;
+    }
+    const color = typeColor(node.type ?? 'node');
+    const head = [
+      node.type ? `<span class="ncard-type">${esc(node.type)}</span>` : '',
+      `<span class="ncard-title">${esc(node.title ?? node.id ?? 'Untitled')}</span>`,
+      node.id ? `<span class="ncard-id">${esc(node.id)}</span>` : '',
+    ].join('');
+
+    let rels = '';
+    if (node.rel && typeof node.rel === 'object' && !Array.isArray(node.rel)) {
+      const rows = Object.entries(node.rel).map(([verb, targets]) => {
+        const list = (Array.isArray(targets) ? targets : [targets]).map(wikilink).join(' ');
+        return `<div class="ncard-rel"><span class="ncard-rel-verb">${esc(verb.replace(/_/g, ' '))}</span>${list}</div>`;
+      });
+      if (rows.length) rels = `<div class="ncard-rels">${rows.join('')}</div>`;
+    }
+
+    const shown = new Set(['id', 'type', 'title', 'rel']);
+    const rest = Object.entries(node).filter(([k]) => !shown.has(k));
+    const meta = rest.length
+      ? `<div class="ncard-meta">${rest.map(([k, v]) =>
+          `<b>${esc(k)}</b>: ${esc(Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? Object.entries(v).map(([a, b]) => `${a}: ${b}`).join(' · ') : v)}`
+        ).join('\n')}</div>`
+      : '';
+
+    return `<div class="ncard" style="--node-color:${color}"><div class="ncard-head">${head}</div>${rels}${meta}</div>`;
+  };
+
+  const renderProse = (md) => {
+    const withLinks = md.replace(/\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g,
+      (_, target, label) => wikilink((label ?? target).trim()));
+    return marked.parse(withLinks);
+  };
+
+  // md2hd markdown alternates YAML node blocks with prose; a block only counts
+  // as a node when its body looks like YAML — otherwise it stays prose.
+  const render = (text) => {
+    const YAML_BLOCK = /(^|\n)---[ \t]*\n([\s\S]*?)\n---[ \t]*(?=\n|$)/g;
+    const looksLikeYaml = (body) => /^[A-Za-z0-9_-]+[ \t]*:/m.test(body);
+    let html = '';
+    let cursor = 0;
+    let match;
+    while ((match = YAML_BLOCK.exec(text)) !== null) {
+      const body = match[2];
+      if (!looksLikeYaml(body)) continue;
+      html += renderProse(text.slice(cursor, match.index));
+      html += renderNodeCard(parseNode(body), body);
+      cursor = match.index + match[0].length;
+    }
+    html += renderProse(text.slice(cursor));
+    return html;
+  };
+
+  const show = (i) => { content.innerHTML = render(files[i].text); };
+
+  if (files.length > 1) {
+    const select = document.createElement('select');
+    for (const [i, f] of files.entries()) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = f.path;
+      select.append(option);
+    }
+    select.addEventListener('change', () => show(Number(select.value)));
+    const wrap = document.createElement('div');
+    wrap.className = 'file-picker';
+    wrap.append(select);
+    pickerHost.append(wrap);
+  }
+  show(0);
+})();
+</script>
+</body>
+</html>

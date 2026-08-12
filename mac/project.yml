@@ -1,0 +1,88 @@
+name: MDSee
+options:
+  bundleIdPrefix: com.goodgord
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: NO
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+
+targets:
+  MDSee:
+    type: application
+    platform: macOS
+    sources:
+      - path: MDSee
+      - path: Shared
+      - path: Resources/viewer
+        type: folder
+        buildPhase: resources
+      - path: ../dist
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodgord.MDSee
+        CODE_SIGN_ENTITLEMENTS: MDSee/MDSee.entitlements
+        INFOPLIST_KEY_NSPrincipalClass: NSApplication
+    info:
+      path: MDSee/Info.plist
+      properties:
+        CFBundleDisplayName: MDSee
+        CFBundleName: MDSee
+        LSMinimumSystemVersion: "13.0"
+        NSPrincipalClass: NSApplication
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: "MIT. Built on md2hd by Evan Steinhilb."
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Markdown Document
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - net.daringfireball.markdown
+              - public.plain-text
+          - CFBundleTypeName: Folder
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.folder
+    dependencies:
+      - target: MDSeeQuickLook
+        embed: true
+
+  MDSeeQuickLook:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: QuickLook
+      - path: Shared
+      - path: Resources/viewer
+        type: folder
+        buildPhase: resources
+      - path: ../dist
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodgord.MDSee.QuickLook
+        CODE_SIGN_ENTITLEMENTS: QuickLook/QuickLook.entitlements
+        SKIP_INSTALL: YES
+    info:
+      path: QuickLook/Info.plist
+      properties:
+        CFBundleDisplayName: MDSee Quick Look
+        CFBundleName: MDSeeQuickLook
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - net.daringfireball.markdown
+            QLSupportsSearchableItems: false

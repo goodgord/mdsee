@@ -3,3 +3,7 @@ node_modules/
 .impeccable*
 *.tgz
 .claude/settings.local.json
+
+# macOS build artifacts
+mac/build/
+mac/MDSee.xcodeproj/
