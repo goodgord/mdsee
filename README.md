@@ -54,18 +54,19 @@ bundled prebuilt (`dist/`) and served to a `WKWebView` through a custom
 into the page as the same `__files.json` payload the md2hd CLI serves. The
 whole thing is sandboxed with no network access.
 
-## Building
+## Installing
 
 Requires Xcode and [xcodegen](https://github.com/yonaskolb/XcodeGen)
-(`brew install xcodegen`).
+(`brew install xcodegen`). Building from source keeps Gatekeeper happy —
+locally built apps aren't quarantined, so there's nothing to right-click-open.
 
 ```sh
-cd mac
-xcodegen generate
-xcodebuild -project MDSee.xcodeproj -scheme MDSee -configuration Release \
-  -derivedDataPath build build
-open build/Build/Products/Release/MDSee.app   # registers the extension
+git clone https://github.com/goodgord/mdsee.git
+mdsee/mac/install.sh
 ```
+
+That builds MDSee, installs it to /Applications, and registers the Quick
+Look extension. Press space on a `.md` file and you're done.
 
 If another Quick Look extension already owns markdown previews (Markdown
 Peek, QLMarkdown, …), pick the handler in **System Settings → General →
@@ -74,6 +75,8 @@ Login Items & Extensions → Quick Look**, or from a terminal:
 ```sh
 pluginkit -e use -i com.goodgord.MDSee.QuickLook
 ```
+
+To uninstall, delete `/Applications/MDSee.app`.
 
 `samples/partnerships.md` is a small hand-written md2hd map to try; any
 markdown file exercises the outline map.
