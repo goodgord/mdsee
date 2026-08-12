@@ -10,3 +10,4 @@ mac/MDSee.xcodeproj/
 
 # installed agent skills (npx skills add)
 .agents/
+.claude/skills/
