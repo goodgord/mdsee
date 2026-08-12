@@ -46,6 +46,46 @@ structure before handing it to the canvas:
 The Preview face always shows your file verbatim; only the map sees the
 transformation.
 
+## Let your agent write the map
+
+The outline map works on any markdown, but mdsee really shines when the
+markdown is *authored for the map* — typed nodes, named relationships,
+weights — and the cheapest way to get that is to have your coding agent do
+it while it's already writing the file. Architecture docs, briefing notes,
+incident writeups, the context files you keep for agents anyway: ask for
+them as md2hd maps and every one becomes a graph you can spacebar.
+
+Hand-writing the format is easy to get subtly wrong — md2hd has no error
+state, so mistakes draw *something* rather than failing. The bundled
+`writing-md2hd-maps` skill (from upstream md2hd) teaches an agent the whole
+authoring language plus the traps: silent node loss from `key:value` missing
+its space, arrows flipped by `_by` suffixes, titles hijacked by body
+headings, relations merged by stem.
+
+Set it up once per project (or globally) with the
+[skills CLI](https://github.com/vercel-labs/skills) — it installs for Claude
+Code, Codex, Cursor, Gemini CLI, and a dozen other agents:
+
+```sh
+npx skills add goodgord/mdsee
+```
+
+Then just ask your agent, in its own words:
+
+> Rewrite docs/ARCHITECTURE.md as an md2hd map using the writing-md2hd-maps
+> skill. Keep the prose as node bodies.
+
+or, for new material:
+
+> Write up this incident as an md2hd map — services, people, timeline,
+> action items.
+
+Claude Code users can also invoke it directly with `/writing-md2hd-maps`, or
+install it as a plugin from upstream
+(`/plugin marketplace add evan-steinhilb/md2hd`). Agents with the skill
+loaded pick it up automatically whenever a task mentions md2hd or map
+authoring. When it's done: press space on the file.
+
 ## How it works
 
 There is no server and nothing leaves your machine. The md2hd web app is
