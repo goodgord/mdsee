@@ -35,6 +35,7 @@ xcodebuild -project MDSee.xcodeproj -scheme MDSee -configuration Release \
   CODE_SIGN_IDENTITY="$IDENTITY" \
   DEVELOPMENT_TEAM="$TEAM" \
   OTHER_CODE_SIGN_FLAGS="--timestamp" \
+  CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
   MARKETING_VERSION="$VERSION" \
   build
 
@@ -43,7 +44,14 @@ ZIP="build/MDSee-$VERSION.zip"
 
 echo "▸ notarizing"
 ditto -c -k --keepParent "$APP" "$ZIP"
-xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait
+RESULT=$(xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait -f json)
+SUBMISSION=$(echo "$RESULT" | /usr/bin/python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+STATUS=$(echo "$RESULT" | /usr/bin/python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])')
+if [ "$STATUS" != "Accepted" ]; then
+  echo "release: notarization $STATUS — Apple's log follows" >&2
+  xcrun notarytool log "$SUBMISSION" --keychain-profile "$PROFILE" >&2
+  exit 1
+fi
 
 echo "▸ stapling"
 xcrun stapler staple "$APP"
