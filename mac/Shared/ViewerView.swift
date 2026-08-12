@@ -45,7 +45,9 @@ final class ViewerView: NSView {
         toggleBackdrop.addSubview(toggle)
         NSLayoutConstraint.activate([
             toggleBackdrop.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            toggleBackdrop.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            // Clear of the web view's scroll bar even when legacy always-on
+            // scrollers are showing (~16pt).
+            toggleBackdrop.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -28),
             toggle.topAnchor.constraint(equalTo: toggleBackdrop.topAnchor, constant: 4),
             toggle.bottomAnchor.constraint(equalTo: toggleBackdrop.bottomAnchor, constant: -4),
             toggle.leadingAnchor.constraint(equalTo: toggleBackdrop.leadingAnchor, constant: 6),
