@@ -7,3 +7,6 @@ node_modules/
 # macOS build artifacts
 mac/build/
 mac/MDSee.xcodeproj/
+
+# installed agent skills (npx skills add)
+.agents/
