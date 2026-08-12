@@ -8,11 +8,15 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
+    # Dev builds are ad-hoc signed; release.sh overrides with the
+    # Developer ID identity for notarized distribution.
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
     DEVELOPMENT_TEAM: ""
-    ENABLE_HARDENED_RUNTIME: NO
+    ENABLE_HARDENED_RUNTIME: YES
     MACOSX_DEPLOYMENT_TARGET: "13.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
 
 targets:
   MDSee:
@@ -37,6 +41,8 @@ targets:
       properties:
         CFBundleDisplayName: MDSee
         CFBundleName: MDSee
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSMinimumSystemVersion: "13.0"
         NSPrincipalClass: NSApplication
         LSApplicationCategoryType: public.app-category.productivity
@@ -79,6 +85,8 @@ targets:
       properties:
         CFBundleDisplayName: MDSee Quick Look
         CFBundleName: MDSeeQuickLook
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
