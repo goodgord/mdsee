@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "writing-md2hd-maps": {
+      "source": "goodgord/mdsee",
+      "sourceType": "github",
+      "skillPath": "skills/writing-md2hd-maps/SKILL.md",
+      "computedHash": "e443f89c07d4aa48d7dd75f0c5dc7101ab6a8b883f37a224438c76d8048ef831"
+    }
+  }
+}
